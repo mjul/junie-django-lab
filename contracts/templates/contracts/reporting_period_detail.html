@@ -106,7 +106,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title">Measurements</h5>
+                <h5 class="card-title">Measurements for {{ period.contract.name }}</h5>
             </div>
             <div class="card-body">
                 {% if report_items %}
@@ -115,6 +115,7 @@
                             <thead>
                                 <tr>
                                     <th>Service Level Indicator</th>
+                                    <th>Reporting Period</th>
                                     <th>Reported Value</th>
                                     <th>Calculated Value</th>
                                     <th>Disputed</th>
@@ -125,6 +126,7 @@
                                 {% for item in report_items %}
                                     <tr>
                                         <td>{{ item.measurement.sli.name }}</td>
+                                        <td>{{ period.start_date|date:"M d, Y" }} to {{ period.end_date|date:"M d, Y" }}</td>
                                         <td>{{ item.measurement.reported_value }} {{ item.measurement.sli.unit }}</td>
                                         <td>{{ item.measurement.calculated_value }} {{ item.measurement.sli.unit }}</td>
                                         <td>
