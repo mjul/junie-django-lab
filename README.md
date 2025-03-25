@@ -89,6 +89,22 @@ After installing the dependencies, follow these steps to run the project:
 
 4. Access the admin interface at http://localhost:8000/admin/
 
+### Loading Demo Data
+
+To load demo data for testing and demonstration purposes, run the following command:
+
+```bash
+python manage.py add_demo_data
+```
+
+This will create:
+- A Demo tenant
+- Contract templates (Standard Terms 2023 and 2025)
+- Service Level Indicators (SLIs) for different priority levels
+- Multiple contracts with different dates and statuses
+- Service Level Agreements (SLAs) for each contract
+- Parties (sellers and buyers) associated with contracts
+
 ### Project Structure
 
 - `config/`: Main project configuration
