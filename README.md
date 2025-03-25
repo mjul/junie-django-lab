@@ -1,6 +1,6 @@
 # Junie Django Lab
 
-A Django project template with modern Python tooling.
+A Django project template with modern Python tooling. This project includes a basic Django setup with Django Admin enabled and SQLite as the database.
 
 ## Setup
 
@@ -60,3 +60,40 @@ uv is a fast Python package installer and resolver. Here are some common command
   ```
 
 For more information, visit the [uv documentation](https://github.com/astral-sh/uv).
+
+## Django Project
+
+This is a basic Django project with the following features:
+- Django Admin interface enabled
+- SQLite database
+- Default Django authentication system
+
+### Running the Project
+
+After installing the dependencies, follow these steps to run the project:
+
+1. Apply migrations to set up the database:
+   ```bash
+   python manage.py migrate
+   ```
+
+2. Create a superuser for the admin interface:
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+3. Start the development server:
+   ```bash
+   python manage.py runserver
+   ```
+
+4. Access the admin interface at http://localhost:8000/admin/
+
+### Project Structure
+
+- `config/`: Main project configuration
+  - `settings.py`: Project settings including database configuration
+  - `urls.py`: URL routing configuration
+  - `wsgi.py` and `asgi.py`: Web server configuration
+- `manage.py`: Django command-line utility
+- `db.sqlite3`: SQLite database file (created after running migrations)
