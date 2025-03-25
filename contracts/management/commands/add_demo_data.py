@@ -1,0 +1,311 @@
+from django.core.management.base import BaseCommand
+from django.utils import timezone
+from django.contrib.auth.models import User
+from contracts.models import (
+    Tenant, ContractTemplate, ServiceLevelIndicator, ServiceLevelAgreement, Contract
+)
+from datetime import date
+
+class Command(BaseCommand):
+    help = 'Adds demo data to the database for demonstration purposes'
+
+    def handle(self, *args, **options):
+        self.stdout.write('Adding demo data...')
+        
+        # Create Demo tenant
+        demo_tenant, created = Tenant.objects.get_or_create(
+            name='Demo'
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Demo tenant'))
+        else:
+            self.stdout.write(self.style.WARNING(f'Demo tenant already exists'))
+        
+        # Create admin user if it doesn't exist
+        admin_username = 'admin'
+        if not User.objects.filter(username=admin_username).exists():
+            User.objects.create_superuser(
+                username=admin_username,
+                email='admin@example.com',
+                password='adminpassword'
+            )
+            self.stdout.write(self.style.SUCCESS(f'Created admin user'))
+        else:
+            self.stdout.write(self.style.WARNING(f'Admin user already exists'))
+        
+        # Create Standard Terms 2023 template
+        template_2023, created = ContractTemplate.objects.get_or_create(
+            tenant=demo_tenant,
+            name='Standard Terms 2023',
+            defaults={
+                'publication_date': date(2023, 1, 1)
+            }
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Standard Terms 2023 template'))
+        else:
+            self.stdout.write(self.style.WARNING(f'Standard Terms 2023 template already exists'))
+        
+        # Create Standard Terms 2025 template
+        template_2025, created = ContractTemplate.objects.get_or_create(
+            tenant=demo_tenant,
+            name='Standard Terms 2025',
+            defaults={
+                'publication_date': date(2025, 1, 1)
+            }
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Standard Terms 2025 template'))
+        else:
+            self.stdout.write(self.style.WARNING(f'Standard Terms 2025 template already exists'))
+        
+        # Create SLIs for remediation
+        sli_p1, created = ServiceLevelIndicator.objects.get_or_create(
+            name='Priority 1 Time to Fix',
+            defaults={
+                'description': 'Maximum time to fix Priority 1 issues',
+                'unit': 'hours'
+            }
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Priority 1 Time to Fix SLI'))
+        
+        sli_p2, created = ServiceLevelIndicator.objects.get_or_create(
+            name='Priority 2 Time to Fix',
+            defaults={
+                'description': 'Maximum time to fix Priority 2 issues',
+                'unit': 'hours'
+            }
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Priority 2 Time to Fix SLI'))
+        
+        sli_p3, created = ServiceLevelIndicator.objects.get_or_create(
+            name='Priority 3 Time to Fix',
+            defaults={
+                'description': 'Maximum time to fix Priority 3 issues',
+                'unit': 'days'
+            }
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Priority 3 Time to Fix SLI'))
+        
+        # Additional SLIs for 2025 template
+        sli_p4, created = ServiceLevelIndicator.objects.get_or_create(
+            name='Priority 4 Time to Fix',
+            defaults={
+                'description': 'Maximum time to fix Priority 4 issues',
+                'unit': 'days'
+            }
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Priority 4 Time to Fix SLI'))
+        
+        sli_p5, created = ServiceLevelIndicator.objects.get_or_create(
+            name='Priority 5 Time to Fix',
+            defaults={
+                'description': 'Maximum time to fix Priority 5 issues',
+                'unit': 'days'
+            }
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Priority 5 Time to Fix SLI'))
+        
+        # Create Contract instances
+        # 1. Standard Terms 2023 - Jan 1, 2023 - Signed
+        contract_2023_jan, created = Contract.objects.get_or_create(
+            tenant=demo_tenant,
+            template=template_2023,
+            name='Standard Terms 2023 - Jan 2023',
+            defaults={
+                'signature_date': date(2022, 12, 15),  # Signed before effective date
+                'effective_date': date(2023, 1, 1),
+                'expiration_date': date(2026, 1, 1),  # 3 years duration
+                'status': 'ACTIVE',  # Signed status
+                'reporting_frequency': 'MONTHLY'
+            }
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Standard Terms 2023 - Jan 2023 contract'))
+            
+            # Create SLAs for this contract
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2023_jan,
+                name='Priority 1 Remediation',
+                sli=sli_p1,
+                threshold_type='MAX',
+                threshold_value=1.0  # 1 hour
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2023_jan,
+                name='Priority 2 Remediation',
+                sli=sli_p2,
+                threshold_type='MAX',
+                threshold_value=24.0  # 24 hours
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2023_jan,
+                name='Priority 3 Remediation',
+                sli=sli_p3,
+                threshold_type='MAX',
+                threshold_value=7.0  # 7 days
+            )
+        
+        # 2. Standard Terms 2023 - Jan 1, 2024 - Signed
+        contract_2023_jan_2024, created = Contract.objects.get_or_create(
+            tenant=demo_tenant,
+            template=template_2023,
+            name='Standard Terms 2023 - Jan 2024',
+            defaults={
+                'signature_date': date(2023, 12, 15),  # Signed before effective date
+                'effective_date': date(2024, 1, 1),
+                'expiration_date': date(2027, 1, 1),  # 3 years duration
+                'status': 'ACTIVE',  # Signed status
+                'reporting_frequency': 'MONTHLY'
+            }
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Standard Terms 2023 - Jan 2024 contract'))
+            
+            # Create SLAs for this contract
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2023_jan_2024,
+                name='Priority 1 Remediation',
+                sli=sli_p1,
+                threshold_type='MAX',
+                threshold_value=1.0  # 1 hour
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2023_jan_2024,
+                name='Priority 2 Remediation',
+                sli=sli_p2,
+                threshold_type='MAX',
+                threshold_value=24.0  # 24 hours
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2023_jan_2024,
+                name='Priority 3 Remediation',
+                sli=sli_p3,
+                threshold_type='MAX',
+                threshold_value=7.0  # 7 days
+            )
+        
+        # 3. Standard Terms 2025 - Jan 1, 2025 - Signed
+        contract_2025_jan, created = Contract.objects.get_or_create(
+            tenant=demo_tenant,
+            template=template_2025,
+            name='Standard Terms 2025 - Jan 2025',
+            defaults={
+                'signature_date': date(2024, 12, 15),  # Signed before effective date
+                'effective_date': date(2025, 1, 1),
+                'expiration_date': date(2028, 1, 1),  # 3 years duration
+                'status': 'ACTIVE',  # Signed status
+                'reporting_frequency': 'MONTHLY'
+            }
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Standard Terms 2025 - Jan 2025 contract'))
+            
+            # Create SLAs for this contract
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_jan,
+                name='Priority 1 Remediation',
+                sli=sli_p1,
+                threshold_type='MAX',
+                threshold_value=1.0  # 1 hour
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_jan,
+                name='Priority 2 Remediation',
+                sli=sli_p2,
+                threshold_type='MAX',
+                threshold_value=24.0  # 24 hours
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_jan,
+                name='Priority 3 Remediation',
+                sli=sli_p3,
+                threshold_type='MAX',
+                threshold_value=7.0  # 7 days
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_jan,
+                name='Priority 4 Remediation',
+                sli=sli_p4,
+                threshold_type='MAX',
+                threshold_value=14.0  # 14 days
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_jan,
+                name='Priority 5 Remediation',
+                sli=sli_p5,
+                threshold_type='MAX',
+                threshold_value=30.0  # 30 days
+            )
+        
+        # 4. Standard Terms 2025 - Mar 1, 2025 - Draft
+        contract_2025_mar, created = Contract.objects.get_or_create(
+            tenant=demo_tenant,
+            template=template_2025,
+            name='Standard Terms 2025 - Mar 2025',
+            defaults={
+                'signature_date': None,  # No signature date for draft
+                'effective_date': date(2025, 3, 1),
+                'expiration_date': date(2028, 3, 1),  # 3 years duration
+                'status': 'DRAFT',  # Draft status
+                'reporting_frequency': 'MONTHLY'
+            }
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Created Standard Terms 2025 - Mar 2025 contract (Draft)'))
+            
+            # Create SLAs for this contract
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_mar,
+                name='Priority 1 Remediation',
+                sli=sli_p1,
+                threshold_type='MAX',
+                threshold_value=1.0  # 1 hour
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_mar,
+                name='Priority 2 Remediation',
+                sli=sli_p2,
+                threshold_type='MAX',
+                threshold_value=24.0  # 24 hours
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_mar,
+                name='Priority 3 Remediation',
+                sli=sli_p3,
+                threshold_type='MAX',
+                threshold_value=7.0  # 7 days
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_mar,
+                name='Priority 4 Remediation',
+                sli=sli_p4,
+                threshold_type='MAX',
+                threshold_value=14.0  # 14 days
+            )
+            
+            ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_mar,
+                name='Priority 5 Remediation',
+                sli=sli_p5,
+                threshold_type='MAX',
+                threshold_value=30.0  # 30 days
+            )
+        
+        self.stdout.write(self.style.SUCCESS('Demo data added successfully!'))
