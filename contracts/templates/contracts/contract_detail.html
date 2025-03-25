@@ -127,51 +127,28 @@
                 <h5 class="card-title">Service Level Agreements</h5>
             </div>
             <div class="card-body">
-                {% with root_slas=contract.slas.all|dictsortreversed:"parent" %}
-                    {% if root_slas %}
-                        <ul class="list-group">
-                            {% for sla in root_slas %}
-                                {% if not sla.parent %}
-                                    <li class="list-group-item">
-                                        <strong>{{ sla.name }}</strong>
-                                        {% if sla.sli %}
-                                            <br>
-                                            <small>
-                                                {{ sla.sli.name }}
-                                                {% if sla.threshold_type and sla.threshold_value %}
-                                                    ({{ sla.get_threshold_type_display }}: {{ sla.threshold_value }} {{ sla.sli.unit }})
-                                                {% endif %}
-                                            </small>
-                                        {% endif %}
-
-                                        {% if sla.children.all %}
-                                            <ul class="list-group mt-2">
-                                                {% for child in sla.children.all %}
-                                                    <li class="list-group-item">
-                                                        <strong>{{ child.name }}</strong>
-                                                        {% if child.sli %}
-                                                            <br>
-                                                            <small>
-                                                                {{ child.sli.name }}
-                                                                {% if child.threshold_type and child.threshold_value %}
-                                                                    ({{ child.get_threshold_type_display }}: {{ child.threshold_value }} {{ child.sli.unit }})
-                                                                {% endif %}
-                                                            </small>
-                                                        {% endif %}
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% endif %}
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <div class="alert alert-info">
-                            No service level agreements defined for this contract.
-                        </div>
-                    {% endif %}
-                {% endwith %}
+                {% if sla_tree %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Service Level Agreement</th>
+                                    <th>Service Level Indicator</th>
+                                    <th>Threshold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for node in sla_tree %}
+                                    {% include "contracts/partials/sla_tree_row_contract.html" with node=node level=0 %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No service level agreements defined for this contract.
+                    </div>
+                {% endif %}
             </div>
             <div class="card-footer">
                 <a href="{% url 'admin:contracts_servicelevelagreement_add' %}" class="btn btn-success">

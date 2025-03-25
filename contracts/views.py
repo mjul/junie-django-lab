@@ -105,6 +105,7 @@ def contract_detail(request, contract_id):
     """
     Contract detail view showing all reporting periods and their compliance status.
     Allows filtering by reporting period and number of periods to show.
+    Also shows the SLA tree with associated SLIs.
     """
     contract = get_object_or_404(Contract, id=contract_id)
 
@@ -145,11 +146,25 @@ def contract_detail(request, contract_id):
             period.compliance_percentage = None
             period.has_report = False
 
+    # Build SLA tree for the contract
+    root_slas = ServiceLevelAgreement.objects.filter(
+        contract=contract,
+        parent__isnull=True
+    )
+
+    # Build a tree structure for the template
+    sla_tree = []
+    for root_sla in root_slas:
+        sla_node = _build_sla_tree(root_sla, [])  # Empty list as there are no report items in this context
+        if sla_node:
+            sla_tree.append(sla_node)
+
     context = {
         'contract': contract,
         'reporting_periods': reporting_periods,
         'all_periods_count': all_periods.count(),
         'months': months,
+        'sla_tree': sla_tree,
     }
 
     return render(request, 'contracts/contract_detail.html', context)

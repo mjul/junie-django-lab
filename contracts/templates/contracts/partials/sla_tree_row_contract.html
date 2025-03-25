@@ -1,0 +1,28 @@
+<!-- SLA Tree Row Partial Template for Contract Details -->
+<!-- This template is used to render a row in the SLA tree table for contract details -->
+<!-- It is called recursively to render child SLAs with proper indentation -->
+
+<tr>
+    <td style="padding-left: {{ level|add:1 }}em;">
+        <strong>{{ node.sla.name }}</strong>
+    </td>
+    <td>
+        {% if node.sla.sli %}
+            {{ node.sla.sli.name }}
+        {% else %}
+            <span class="text-muted">N/A</span>
+        {% endif %}
+    </td>
+    <td>
+        {% if node.sla.threshold_type and node.sla.threshold_value %}
+            {{ node.sla.get_threshold_type_display }}: {{ node.sla.threshold_value }} {{ node.sla.sli.unit }}
+        {% else %}
+            <span class="text-muted">N/A</span>
+        {% endif %}
+    </td>
+</tr>
+
+<!-- Recursively render child SLAs -->
+{% for child in node.children %}
+    {% include "contracts/partials/sla_tree_row_contract.html" with node=child level=level|add:1 %}
+{% endfor %}
