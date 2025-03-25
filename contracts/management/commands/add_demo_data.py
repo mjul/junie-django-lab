@@ -128,10 +128,20 @@ class Command(BaseCommand):
         if created:
             self.stdout.write(self.style.SUCCESS(f'Created Standard Terms 2023 - Jan 2023 contract'))
 
-            # Create SLAs for this contract
+            # Create a top-level "Mitigation" SLA node
+            mitigation_sla, _ = ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2023_jan,
+                name='Mitigation',
+                defaults={
+                    'description': 'Top-level node for mitigation SLAs'
+                }
+            )
+
+            # Create SLAs for this contract as children of the Mitigation node
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2023_jan,
                 name='Priority 1 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p1,
                 threshold_type='MAX',
                 threshold_value=1.0  # 1 hour
@@ -140,6 +150,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2023_jan,
                 name='Priority 2 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p2,
                 threshold_type='MAX',
                 threshold_value=24.0  # 24 hours
@@ -148,6 +159,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2023_jan,
                 name='Priority 3 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p3,
                 threshold_type='MAX',
                 threshold_value=7.0  # 7 days
@@ -169,10 +181,20 @@ class Command(BaseCommand):
         if created:
             self.stdout.write(self.style.SUCCESS(f'Created Standard Terms 2023 - Jan 2024 contract'))
 
-            # Create SLAs for this contract
+            # Create a top-level "Mitigation" SLA node
+            mitigation_sla, _ = ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2023_jan_2024,
+                name='Mitigation',
+                defaults={
+                    'description': 'Top-level node for mitigation SLAs'
+                }
+            )
+
+            # Create SLAs for this contract as children of the Mitigation node
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2023_jan_2024,
                 name='Priority 1 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p1,
                 threshold_type='MAX',
                 threshold_value=1.0  # 1 hour
@@ -181,6 +203,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2023_jan_2024,
                 name='Priority 2 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p2,
                 threshold_type='MAX',
                 threshold_value=24.0  # 24 hours
@@ -189,6 +212,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2023_jan_2024,
                 name='Priority 3 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p3,
                 threshold_type='MAX',
                 threshold_value=7.0  # 7 days
@@ -210,10 +234,20 @@ class Command(BaseCommand):
         if created:
             self.stdout.write(self.style.SUCCESS(f'Created Standard Terms 2025 - Jan 2025 contract'))
 
-            # Create SLAs for this contract
+            # Create a top-level "Mitigation" SLA node
+            mitigation_sla, _ = ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_jan,
+                name='Mitigation',
+                defaults={
+                    'description': 'Top-level node for mitigation SLAs'
+                }
+            )
+
+            # Create SLAs for this contract as children of the Mitigation node
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2025_jan,
                 name='Priority 1 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p1,
                 threshold_type='MAX',
                 threshold_value=1.0  # 1 hour
@@ -222,6 +256,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2025_jan,
                 name='Priority 2 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p2,
                 threshold_type='MAX',
                 threshold_value=24.0  # 24 hours
@@ -230,6 +265,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2025_jan,
                 name='Priority 3 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p3,
                 threshold_type='MAX',
                 threshold_value=7.0  # 7 days
@@ -238,6 +274,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2025_jan,
                 name='Priority 4 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p4,
                 threshold_type='MAX',
                 threshold_value=14.0  # 14 days
@@ -246,6 +283,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2025_jan,
                 name='Priority 5 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p5,
                 threshold_type='MAX',
                 threshold_value=30.0  # 30 days
@@ -267,10 +305,20 @@ class Command(BaseCommand):
         if created:
             self.stdout.write(self.style.SUCCESS(f'Created Standard Terms 2025 - Mar 2025 contract (Draft)'))
 
-            # Create SLAs for this contract
+            # Create a top-level "Mitigation" SLA node
+            mitigation_sla, _ = ServiceLevelAgreement.objects.get_or_create(
+                contract=contract_2025_mar,
+                name='Mitigation',
+                defaults={
+                    'description': 'Top-level node for mitigation SLAs'
+                }
+            )
+
+            # Create SLAs for this contract as children of the Mitigation node
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2025_mar,
                 name='Priority 1 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p1,
                 threshold_type='MAX',
                 threshold_value=1.0  # 1 hour
@@ -279,6 +327,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2025_mar,
                 name='Priority 2 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p2,
                 threshold_type='MAX',
                 threshold_value=24.0  # 24 hours
@@ -287,6 +336,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2025_mar,
                 name='Priority 3 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p3,
                 threshold_type='MAX',
                 threshold_value=7.0  # 7 days
@@ -295,6 +345,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2025_mar,
                 name='Priority 4 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p4,
                 threshold_type='MAX',
                 threshold_value=14.0  # 14 days
@@ -303,6 +354,7 @@ class Command(BaseCommand):
             ServiceLevelAgreement.objects.get_or_create(
                 contract=contract_2025_mar,
                 name='Priority 5 Remediation',
+                parent=mitigation_sla,
                 sli=sli_p5,
                 threshold_type='MAX',
                 threshold_value=30.0  # 30 days
