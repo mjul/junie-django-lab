@@ -1,0 +1,97 @@
+{% extends 'contracts/base.html' %}
+
+{% block title %}Dashboard - Contract Management System{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">System Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h3 class="card-title">{{ tenants.count }}</h3>
+                                <p class="card-text">Tenants</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h3 class="card-title">{{ total_contracts }}</h3>
+                                <p class="card-text">Total Contracts</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h3 class="card-title">{{ total_active_contracts }}</h3>
+                                <p class="card-text">Active Contracts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Tenants</h5>
+            </div>
+            <div class="card-body">
+                {% if tenants %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tenant</th>
+                                    <th>Total Contracts</th>
+                                    <th>Active Contracts</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tenant in tenants %}
+                                    <tr>
+                                        <td>{{ tenant.name }}</td>
+                                        <td>{{ tenant.contract_count }}</td>
+                                        <td>{{ tenant.active_contract_count }}</td>
+                                        <td>
+                                            <a href="{% url 'contracts:tenant_detail' tenant.id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            <a href="{% url 'admin:contracts_tenant_change' tenant.id %}" class="btn btn-sm btn-secondary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No tenants found. <a href="{% url 'admin:contracts_tenant_add' %}" class="alert-link">Create a tenant</a> to get started.
+                    </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'admin:contracts_tenant_add' %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add Tenant
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

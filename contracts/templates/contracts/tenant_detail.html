@@ -1,0 +1,199 @@
+{% extends 'contracts/base.html' %}
+
+{% block title %}{{ tenant.name }} - Contract Management System{% endblock %}
+
+{% block breadcrumb_items %}
+    <li class="breadcrumb-item active">{{ tenant.name }}</li>
+{% endblock %}
+
+{% block page_title %}{{ tenant.name }}{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin:contracts_tenant_change' tenant.id %}" class="btn btn-sm btn-secondary">
+        <i class="fas fa-edit"></i> Edit Tenant
+    </a>
+    <a href="{% url 'admin:contracts_contract_add' %}" class="btn btn-sm btn-success">
+        <i class="fas fa-plus"></i> Add Contract
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Tenant Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Name:</strong> {{ tenant.name }}</p>
+                        <p><strong>Created:</strong> {{ tenant.created_at|date:"F j, Y, g:i a" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Total Contracts:</strong> {{ contracts.count }}</p>
+                        <p><strong>Active Contracts:</strong> {{ tenant.active_contract_count }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Contracts</h5>
+            </div>
+            <div class="card-body">
+                {% if contracts %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th>Template</th>
+                                    <th>Effective Date</th>
+                                    <th>Expiration Date</th>
+                                    <th>Compliance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contract in contracts %}
+                                    <tr>
+                                        <td>{{ contract.name }}</td>
+                                        <td>
+                                            {% if contract.status == 'ACTIVE' %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% elif contract.status == 'DRAFT' %}
+                                                <span class="badge bg-warning text-dark">Draft</span>
+                                            {% elif contract.status == 'EXPIRED' %}
+                                                <span class="badge bg-secondary">Expired</span>
+                                            {% elif contract.status == 'TERMINATED' %}
+                                                <span class="badge bg-danger">Terminated</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.template %}
+                                                {{ contract.template.name }}
+                                            {% else %}
+                                                <span class="text-muted">None</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.effective_date %}
+                                                {{ contract.effective_date|date:"M d, Y" }}
+                                            {% else %}
+                                                <span class="text-muted">Not set</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.expiration_date %}
+                                                {{ contract.expiration_date|date:"M d, Y" }}
+                                            {% else %}
+                                                <span class="text-muted">Not set</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.compliance_percentage is not None %}
+                                                {% if contract.compliance_percentage == 100 %}
+                                                    <span class="compliance-good">
+                                                        <i class="fas fa-check-circle"></i> {{ contract.compliance_percentage|floatformat:1 }}%
+                                                    </span>
+                                                {% elif contract.compliance_percentage >= 80 %}
+                                                    <span class="compliance-warning">
+                                                        <i class="fas fa-exclamation-circle"></i> {{ contract.compliance_percentage|floatformat:1 }}%
+                                                    </span>
+                                                {% else %}
+                                                    <span class="compliance-bad">
+                                                        <i class="fas fa-times-circle"></i> {{ contract.compliance_percentage|floatformat:1 }}%
+                                                    </span>
+                                                {% endif %}
+                                                <br>
+                                                <small class="text-muted">Last updated: {{ contract.latest_report_date|date:"M d, Y" }}</small>
+                                            {% else %}
+                                                <span class="compliance-na">
+                                                    <i class="fas fa-question-circle"></i> No data
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'contracts:contract_detail' contract.id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            <a href="{% url 'admin:contracts_contract_change' contract.id %}" class="btn btn-sm btn-secondary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No contracts found for this tenant. <a href="{% url 'admin:contracts_contract_add' %}" class="alert-link">Create a contract</a> to get started.
+                    </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'admin:contracts_contract_add' %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add Contract
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Contract Templates</h5>
+            </div>
+            <div class="card-body">
+                {% if tenant.contract_templates.all %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Publication Date</th>
+                                    <th>Documents</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for template in tenant.contract_templates.all %}
+                                    <tr>
+                                        <td>{{ template.name }}</td>
+                                        <td>{{ template.publication_date|date:"M d, Y" }}</td>
+                                        <td>{{ template.documents.count }}</td>
+                                        <td>
+                                            <a href="{% url 'admin:contracts_contracttemplate_change' template.id %}" class="btn btn-sm btn-secondary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No contract templates found for this tenant. <a href="{% url 'admin:contracts_contracttemplate_add' %}" class="alert-link">Create a template</a> to get started.
+                    </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'admin:contracts_contracttemplate_add' %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add Template
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
