@@ -2,12 +2,56 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.contrib.auth.models import User
 from contracts.models import (
-    Tenant, ContractTemplate, ServiceLevelIndicator, ServiceLevelAgreement, Contract, Party
+    Tenant, ContractTemplate, ServiceLevelIndicator, ServiceLevelAgreement, Contract, Party,
+    ReportingPeriod, Measurement
 )
+import random
 from datetime import date
 
 class Command(BaseCommand):
     help = 'Adds demo data to the database for demonstration purposes'
+
+    def generate_random_measurements_for_jan_2023_contract(self, contract):
+        """
+        Generate random measurement data for each reporting period of the contract.
+        The reported value will be half the SLA threshold plus 10% noise.
+        """
+        self.stdout.write('Generating random measurement data for contract: ' + contract.name)
+
+        # Get all reporting periods for the contract
+        reporting_periods = ReportingPeriod.objects.filter(contract=contract)
+
+        # Get all SLAs with SLIs for the contract
+        slas = ServiceLevelAgreement.objects.filter(contract=contract, sli__isnull=False)
+
+        # For each reporting period and SLA, create a Measurement
+        for period in reporting_periods:
+            for sla in slas:
+                # Calculate half the threshold value
+                half_threshold = sla.threshold_value / 2
+
+                # Add 10% random noise
+                noise_factor = 1.0 + (random.random() * 0.2 - 0.1)  # Random value between 0.9 and 1.1
+                reported_value = half_threshold * noise_factor
+
+                # Create or update the measurement
+                measurement, created = Measurement.objects.update_or_create(
+                    reporting_period=period,
+                    sli=sla.sli,
+                    defaults={
+                        'reported_value': reported_value,
+                        'calculated_value': reported_value  # For simplicity, set calculated_value equal to reported_value
+                    }
+                )
+
+                if created:
+                    self.stdout.write(self.style.SUCCESS(
+                        f'Created measurement for {period} - {sla.name}: {reported_value:.2f}'
+                    ))
+                else:
+                    self.stdout.write(self.style.WARNING(
+                        f'Updated measurement for {period} - {sla.name}: {reported_value:.2f}'
+                    ))
 
     def handle(self, *args, **options):
         self.stdout.write('Adding demo data...')
@@ -406,5 +450,8 @@ class Command(BaseCommand):
             buyer_index = i % len(buyer_parties)
             contract.parties.add(buyer_parties[buyer_index])
             self.stdout.write(self.style.SUCCESS(f'Associated {shinin_party.name} (Seller) and {buyer_parties[buyer_index].name} (Buyer) with {contract.name}'))
+
+        # Generate random measurement data for the first contract from January 2023
+        self.generate_random_measurements_for_jan_2023_contract(contract_2023_jan)
 
         self.stdout.write(self.style.SUCCESS('Demo data added successfully!'))
