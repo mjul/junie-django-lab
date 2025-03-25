@@ -8,6 +8,7 @@ urlpatterns = [
     path('tenant/<int:tenant_id>/', views.tenant_detail, name='tenant_detail'),
     path('contract/<int:contract_id>/', views.contract_detail, name='contract_detail'),
     path('template/<int:template_id>/', views.template_detail, name='template_detail'),
+    path('party/<int:party_id>/', views.party_detail, name='party_detail'),
     path('reporting-period/<int:period_id>/', views.reporting_period_detail, name='reporting_period_detail'),
     path('reporting-period/<int:period_id>/generate/', views.generate_report, name='generate_report'),
 ]

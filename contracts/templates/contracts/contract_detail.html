@@ -105,7 +105,7 @@
                             <tbody>
                                 {% for party in contract.parties.all %}
                                     <tr>
-                                        <td>{{ party.name }}</td>
+                                        <td><a href="{% url 'contracts:party_detail' party.id %}">{{ party.name }}</a></td>
                                         <td>{{ party.get_type_display }}</td>
                                     </tr>
                                 {% endfor %}

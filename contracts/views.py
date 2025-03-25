@@ -8,7 +8,7 @@ from .models import (
     Tenant, Contract, ReportingPeriod, 
     ComplianceReport, ComplianceReportItem,
     ServiceLevelAgreement, Measurement,
-    ContractTemplate, Document
+    ContractTemplate, Document, Party
 )
 
 @login_required
@@ -267,6 +267,62 @@ def template_detail(request, template_id):
     }
 
     return render(request, 'contracts/template_detail.html', context)
+
+@login_required
+def party_detail(request, party_id):
+    """
+    Party detail view showing party information and associated contracts.
+    """
+    party = get_object_or_404(Party, id=party_id)
+
+    # Get all contracts where this party is associated
+    contracts = party.contracts.all().select_related('tenant', 'template')
+
+    # Separate contracts where party is buyer vs seller
+    buyer_contracts = []
+    seller_contracts = []
+
+    for contract in contracts:
+        if party.type == 'BUYER':
+            buyer_contracts.append(contract)
+        elif party.type == 'SELLER':
+            seller_contracts.append(contract)
+
+    # Get compliance statistics for each contract
+    for contract in contracts:
+        # Get the latest reporting period with a compliance report
+        latest_period = ReportingPeriod.objects.filter(
+            contract=contract,
+            compliance_report__isnull=False
+        ).order_by('-end_date').first()
+
+        if latest_period:
+            try:
+                report = latest_period.compliance_report
+                items = report.items.all()
+                compliant_count = items.filter(is_compliant=True).count()
+                total_count = items.count()
+
+                if total_count > 0:
+                    contract.compliance_percentage = (compliant_count / total_count) * 100
+                else:
+                    contract.compliance_percentage = None
+
+                contract.latest_report_date = report.generated_at
+            except ComplianceReport.DoesNotExist:
+                contract.compliance_percentage = None
+                contract.latest_report_date = None
+        else:
+            contract.compliance_percentage = None
+            contract.latest_report_date = None
+
+    context = {
+        'party': party,
+        'buyer_contracts': buyer_contracts,
+        'seller_contracts': seller_contracts,
+    }
+
+    return render(request, 'contracts/party_detail.html', context)
 
 def _build_sla_tree(sla, report_items):
     """

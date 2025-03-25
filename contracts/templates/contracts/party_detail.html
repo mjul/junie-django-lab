@@ -1,0 +1,238 @@
+{% extends 'contracts/base.html' %}
+
+{% block title %}{{ party.name }} - Contract Management System{% endblock %}
+
+{% block breadcrumb_items %}
+    <li class="breadcrumb-item active">{{ party.name }}</li>
+{% endblock %}
+
+{% block page_title %}{{ party.name }} ({{ party.get_type_display }}){% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin:contracts_party_change' party.id %}" class="btn btn-sm btn-secondary">
+        <i class="fas fa-edit"></i> Edit Party
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Party Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Name:</strong> {{ party.name }}</p>
+                        <p><strong>Type:</strong> {{ party.get_type_display }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Total Contracts:</strong> {{ party.contracts.count }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if party.type == 'BUYER' %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Contracts as Buyer</h5>
+            </div>
+            <div class="card-body">
+                {% if buyer_contracts %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Tenant</th>
+                                    <th>Status</th>
+                                    <th>Effective Date</th>
+                                    <th>Expiration Date</th>
+                                    <th>Compliance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contract in buyer_contracts %}
+                                    <tr>
+                                        <td>{{ contract.name }}</td>
+                                        <td>
+                                            <a href="{% url 'contracts:tenant_detail' contract.tenant.id %}">
+                                                {{ contract.tenant.name }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {% if contract.status == 'ACTIVE' %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% elif contract.status == 'DRAFT' %}
+                                                <span class="badge bg-warning text-dark">Draft</span>
+                                            {% elif contract.status == 'EXPIRED' %}
+                                                <span class="badge bg-secondary">Expired</span>
+                                            {% elif contract.status == 'TERMINATED' %}
+                                                <span class="badge bg-danger">Terminated</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.effective_date %}
+                                                {{ contract.effective_date|date:"M d, Y" }}
+                                            {% else %}
+                                                <span class="text-muted">Not set</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.expiration_date %}
+                                                {{ contract.expiration_date|date:"M d, Y" }}
+                                            {% else %}
+                                                <span class="text-muted">Not set</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.compliance_percentage is not None %}
+                                                {% if contract.compliance_percentage == 100 %}
+                                                    <span class="compliance-good">
+                                                        <i class="fas fa-check-circle"></i> {{ contract.compliance_percentage|floatformat:1 }}%
+                                                    </span>
+                                                {% elif contract.compliance_percentage >= 80 %}
+                                                    <span class="compliance-warning">
+                                                        <i class="fas fa-exclamation-circle"></i> {{ contract.compliance_percentage|floatformat:1 }}%
+                                                    </span>
+                                                {% else %}
+                                                    <span class="compliance-bad">
+                                                        <i class="fas fa-times-circle"></i> {{ contract.compliance_percentage|floatformat:1 }}%
+                                                    </span>
+                                                {% endif %}
+                                                <br>
+                                                <small class="text-muted">Last updated: {{ contract.latest_report_date|date:"M d, Y" }}</small>
+                                            {% else %}
+                                                <span class="compliance-na">
+                                                    <i class="fas fa-question-circle"></i> No data
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'contracts:contract_detail' contract.id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No contracts found where this party is a buyer.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if party.type == 'SELLER' %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Contracts as Seller</h5>
+            </div>
+            <div class="card-body">
+                {% if seller_contracts %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Tenant</th>
+                                    <th>Status</th>
+                                    <th>Effective Date</th>
+                                    <th>Expiration Date</th>
+                                    <th>Compliance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contract in seller_contracts %}
+                                    <tr>
+                                        <td>{{ contract.name }}</td>
+                                        <td>
+                                            <a href="{% url 'contracts:tenant_detail' contract.tenant.id %}">
+                                                {{ contract.tenant.name }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {% if contract.status == 'ACTIVE' %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% elif contract.status == 'DRAFT' %}
+                                                <span class="badge bg-warning text-dark">Draft</span>
+                                            {% elif contract.status == 'EXPIRED' %}
+                                                <span class="badge bg-secondary">Expired</span>
+                                            {% elif contract.status == 'TERMINATED' %}
+                                                <span class="badge bg-danger">Terminated</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.effective_date %}
+                                                {{ contract.effective_date|date:"M d, Y" }}
+                                            {% else %}
+                                                <span class="text-muted">Not set</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.expiration_date %}
+                                                {{ contract.expiration_date|date:"M d, Y" }}
+                                            {% else %}
+                                                <span class="text-muted">Not set</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.compliance_percentage is not None %}
+                                                {% if contract.compliance_percentage == 100 %}
+                                                    <span class="compliance-good">
+                                                        <i class="fas fa-check-circle"></i> {{ contract.compliance_percentage|floatformat:1 }}%
+                                                    </span>
+                                                {% elif contract.compliance_percentage >= 80 %}
+                                                    <span class="compliance-warning">
+                                                        <i class="fas fa-exclamation-circle"></i> {{ contract.compliance_percentage|floatformat:1 }}%
+                                                    </span>
+                                                {% else %}
+                                                    <span class="compliance-bad">
+                                                        <i class="fas fa-times-circle"></i> {{ contract.compliance_percentage|floatformat:1 }}%
+                                                    </span>
+                                                {% endif %}
+                                                <br>
+                                                <small class="text-muted">Last updated: {{ contract.latest_report_date|date:"M d, Y" }}</small>
+                                            {% else %}
+                                                <span class="compliance-na">
+                                                    <i class="fas fa-question-circle"></i> No data
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'contracts:contract_detail' contract.id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No contracts found where this party is a seller.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
