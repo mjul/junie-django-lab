@@ -14,18 +14,9 @@ from .models import (
 @login_required
 def dashboard(request):
     """
-    Dashboard view showing all tenants, contracts, and summary statistics.
+    Dashboard view showing contracts and summary statistics.
     """
-    tenants = Tenant.objects.all()
     contracts = Contract.objects.all().select_related('tenant', 'template')
-
-    # Get counts for each tenant
-    for tenant in tenants:
-        tenant.contract_count = Contract.objects.filter(tenant=tenant).count()
-        tenant.active_contract_count = Contract.objects.filter(
-            tenant=tenant, 
-            status='ACTIVE'
-        ).count()
 
     # Get compliance statistics for each contract
     for contract in contracts:
@@ -59,7 +50,6 @@ def dashboard(request):
             contract.latest_period = None
 
     context = {
-        'tenants': tenants,
         'contracts': contracts,
         'total_contracts': Contract.objects.count(),
         'total_active_contracts': Contract.objects.filter(status='ACTIVE').count(),
